@@ -199,6 +199,7 @@ exports.parse = (config, points, units) => {
             const expand = a.sane(part.expand || 0, `${name}.expand`, 'number')(units)
             const joints = a.in(a.sane(part.joints || 0, `${name}.joints`, 'number')(units), `${name}.joints`, [0, 1, 2])
             const scale = a.sane(part.scale || 1, `${name}.scale`, 'number')(units)
+            const distort = a.numarr(part.distort || [1, 1], `${name}.distort`, 2)(units)
 
             // these keys are then removed, so ops can check their own unexpected keys without interference
             delete part.operation
@@ -211,6 +212,7 @@ exports.parse = (config, points, units) => {
             delete part.expand
             delete part.joints
             delete part.scale
+            delete part.distort
 
             // a prototype "shape" maker (and its units) are computed
             const [shape_maker, shape_units] = whats[what](part, name, points, outlines, units)
@@ -229,6 +231,10 @@ exports.parse = (config, points, units) => {
 
             if (scale !== 1) {
                 outlines[outline_name] = m.model.scale(outlines[outline_name], scale)
+            }
+            
+            if (distort[0] !== 1 || distort[1] !== 1) {
+                outlines[outline_name] = m.model.distort(outlines[outline_name], ...distort)
             }
     
             if (expand) {
